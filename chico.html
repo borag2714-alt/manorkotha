@@ -240,57 +240,66 @@
         <p style="margin-top: 10px; font-size: 0.85rem; opacity: 0.8;">Support: <a href="mailto:deephzarika175@gmail.com" style="color: white; text-decoration: none;">deephzarika175@gmail.com</a></p>
         <p style="margin-top: 15px; font-size: 0.75rem; opacity: 0.5;">&copy; 2026 Campus Voice Initiative</p>
     </footer>
+ 
+<script>
+    // 1. Navigation Control
+    function showPage(pageId) {
+        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
+        document.getElementById(pageId).classList.add('active-page');
+        window.scrollTo(0,0);
+    }
 
-    <script>
-        // Navigation Control
-        function showPage(pageId) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(pageId).classList.add('active-page');
-            window.scrollTo(0,0);
+    // 2. Load the user's personal history on refresh
+    window.onload = function() {
+        const savedData = localStorage.getItem('tcFinalMasterHistory');
+        if (savedData) {
+            document.getElementById('historyFeed').innerHTML = savedData;
         }
+    };
 
-        // Load History from Browser Memory
-        window.onload = function() {
-            const savedData = localStorage.getItem('tcFinalMasterHistory');
-            if (savedData) {
-                document.getElementById('historyFeed').innerHTML = savedData;
-            }
-        };
+    // 3. Form Submission Logic
+    document.getElementById('submissionForm').onsubmit = function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('userName').value;
+        const uClass = document.getElementById('userClass').value;
+        const role = document.getElementById('userRole').value;
+        const type = document.getElementById('msgType').value;
+        const msg = document.getElementById('userMsg').value;
+        const date = new Date().toLocaleDateString();
 
-        // Form Submission Logic
-        document.getElementById('submissionForm').onsubmit = function(e) {
-            e.preventDefault();
-            const name = document.getElementById('userName').value;
-            const uClass = document.getElementById('userClass').value;
-            const role = document.getElementById('userRole').value;
-            const type = document.getElementById('msgType').value;
-            const msg = document.getElementById('userMsg').value;
-            const date = new Date().toLocaleDateString();
+        const formData = { name, uClass, role, type, msg };
 
-            const entry = document.createElement('div');
-            entry.className = 'feed-item';
-            entry.style.borderLeftColor = (type === 'Complaint') ? 'var(--danger)' : 'var(--gold)';
-
-            entry.innerHTML = `
-                <div class="feed-header">
-                    <div class="user-info">
-                        <strong>${name}</strong> | ${uClass}
+        // --- THE FETCH COMMAND IS HERE ---
+        // Paste your Google Web App URL between the single quotes below
+        fetch('https://script.google.com/macros/s/AKfycbyJOiAcwBzyiylzUb345jb-3nhTb4jWHAPp7RWESlclizKtGI6cKrNv2Oipdkye4jpw7Q/exec', {
+            method: 'POST',
+            mode: 'no-cors', // Important for Google Sheets
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        }).then(() => {
+            // After sending to Google, show it on the student's personal feed
+            const entry = `
+                <div class="feed-item" style="border-left-color: ${type === 'Complaint' ? 'var(--danger)' : 'var(--gold)'}">
+                    <div class="feed-header">
+                        <div class="user-info"><strong>${name}</strong> | ${uClass}</div>
+                        <span class="status-badge">SENT TO ADMIN</span>
                     </div>
-                    <span class="status-badge">PENDING REVIEW</span>
-                </div>
-                <p><strong>[${type.toUpperCase()}]</strong> ${msg}</p>
-                <div class="feed-meta">
-                    <span>Designation: ${role}</span>
-                    <span>Date: ${date}</span>
-                </div>
-            `;
+                    <p><strong>[${type.toUpperCase()}]</strong> ${msg}</p>
+                    <div class="feed-meta"><span>Date: ${date}</span></div>
+                </div>`;
 
             const feed = document.getElementById('historyFeed');
-            feed.prepend(entry);
+            feed.innerHTML = entry + feed.innerHTML;
             localStorage.setItem('tcFinalMasterHistory', feed.innerHTML);
+            
             this.reset();
-            alert("Entry successfully registered for Tinsukia College History.");
-        };
-    </script>
+            alert("Success! Your message has been sent to the Social Service Secretary.");
+        }).catch(err => alert("Error connecting to database. Please check your connection."));
+    };
+</script>
+    
 </body>
+
 </html>
